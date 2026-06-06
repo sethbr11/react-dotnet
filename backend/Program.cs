@@ -9,13 +9,24 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCors(); // Cross-origin resource sharing
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 builder.Services.AddDbContext<BowlingLeagueContext>(options =>
     options.UseSqlite(builder.Configuration["ConnectionStrings:BowlingLeagueConnection"])
 );
 
 builder.Services.AddScoped<IBowlingLeagueRepository, EFBowlingLeagueRepository>(); // Everyone gets their own context; ABSTRACTION
+
+// Add health checks service
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -25,13 +36,14 @@ if (app.Environment.IsDevelopment()) {
     app.UseSwaggerUI();
 }
 
-app.UseCors(p => p.WithOrigins("http://localhost:3000"));
+app.UseCors();
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();
 
