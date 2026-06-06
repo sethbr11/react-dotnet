@@ -1,46 +1,90 @@
-# Getting Started with Create React App
+# Frontend — React + Vite + TypeScript
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The frontend is a **React 19** single-page app built with **Vite 8** and **TypeScript 6**. It displays bowling league data fetched from the .NET backend API.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Getting Started
 
-### `npm start`
+```bash
+npm install    # install dependencies
+npm run dev    # start dev server at http://localhost:5173
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+> **Important:** The backend must be running at `http://localhost:5231` before starting the frontend. API calls to `/api/*` are proxied to the backend via the Vite dev server — see `vite.config.ts`.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+---
 
-### `npm test`
+## Key Files
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+| File / Directory       | Purpose                                                          |
+| ---------------------- | ---------------------------------------------------------------- |
+| `index.html`           | Vite entry point (must be at the project root, not in `public/`) |
+| `src/index.tsx`        | React entry — mounts `<App />` into `#root`                      |
+| `src/App.tsx`          | Main layout — renders `Header` and `BowlersTable`                |
+| `src/Header.tsx`       | Page header with BLE logo, title, and description                |
+| `src/BowlersTable.tsx` | Fetches `/api/BowlingLeague` and renders a data table            |
+| `src/types/`           | TypeScript interfaces (`Bowler`, etc.)                           |
+| `src/App.css`          | Component styles (header, table, layout)                         |
+| `src/index.css`        | Global base styles (font, background)                            |
+| `vite.config.ts`       | Vite config — React plugin, API proxy, Vitest settings           |
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Scripts
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+| Command           | Description                                     |
+| ----------------- | ----------------------------------------------- |
+| `npm run dev`     | Start the Vite dev server with HMR              |
+| `npm start`       | Alias for `npm run dev`                         |
+| `npm test`        | Run unit tests with Vitest (watch mode)         |
+| `npm run build`   | Type-check with `tsc` then build for production |
+| `npm run lint`    | Lint all files with ESLint                      |
+| `npm run preview` | Serve the production build locally for testing  |
+| `npm run clean`   | Remove `node_modules` and `package-lock.json`   |
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## Testing
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+Tests use **Vitest** with **React Testing Library** and **jsdom**.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+npm test              # run in watch mode
+npm test -- --run     # run once and exit
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Test config lives in `vite.config.ts` under the `test` key. The setup file at `src/setupTests.ts` loads `@testing-library/jest-dom` matchers (e.g., `.toBeInTheDocument()`).
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+---
 
-## Learn More
+## API Proxy
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+The Vite dev server proxies `/api/*` requests to the backend:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```ts
+// vite.config.ts
+server: {
+  port: 5173,
+  proxy: {
+    '/api': {
+      target: 'http://localhost:5231',
+      changeOrigin: true,
+      secure: false,
+    },
+  },
+}
+```
+
+This means frontend code can use relative paths like `fetch('/api/BowlingLeague')` — no hardcoded backend URLs needed.
+
+---
+
+## Styling
+
+The app uses **vanilla CSS** (no CSS framework). Styles are split between:
+
+- **`index.css`** — base/global styles (font, body background)
+- **`App.css`** — component styles (navbar, table, layout)
+
+The [Inter](https://fonts.google.com/specimen/Inter) font is loaded from Google Fonts in `index.html`.

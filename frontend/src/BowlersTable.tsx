@@ -1,22 +1,26 @@
 import { useEffect, useState } from 'react';
-import { Bowler } from './types/Bowler';
+import type { Bowler } from './types/Bowler';
 
-function BowlersTable(props: any) {
+interface BowlersTableProps {
+  displayTeams: string[];
+}
+
+function BowlersTable(props: BowlersTableProps) {
   const [bowlerData, setBowlerData] = useState<Bowler[]>([]);
 
-  // Updated to handle errors thrown when the backend isn't running (generated w/ help from ChatGPT)
+  // Fetch data from the .NET API (adjust port if needed)
   useEffect(() => {
     const fetchBowlerData = async () => {
       try {
-        const rsp = await fetch('http://localhost:5231/api/BowlingLeague');
+        const rsp = await fetch('/api/BowlingLeague');
         if (!rsp.ok) {
           throw new Error('Failed to fetch data');
         }
         const b = await rsp.json();
-        setBowlerData(b || []); // Set empty array if response is falsy
+        setBowlerData(b ?? []);
       } catch (error) {
         console.error('Error fetching data:', error);
-        setBowlerData([]); // Set empty array in case of error
+        setBowlerData([]);
       }
     };
 
@@ -24,12 +28,11 @@ function BowlersTable(props: any) {
   }, []);
 
   const filteredTeamNames = props.displayTeams;
-
-  var filteredBowlers = bowlerData.filter((b) =>
-    filteredTeamNames.includes(b.team.teamName),
+  let filteredBowlers = bowlerData.filter((b) =>
+    filteredTeamNames?.includes(b.team.teamName),
   );
 
-  // If nothing was passed, display them all
+  // Show all if no filter supplied
   if (!filteredTeamNames || filteredTeamNames.length === 0) {
     filteredBowlers = bowlerData;
   }

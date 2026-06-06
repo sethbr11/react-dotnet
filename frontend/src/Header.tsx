@@ -1,7 +1,12 @@
-import { CSSProperties } from 'react';
-import logo from './BLE-logo.png';
+import type { CSSProperties } from 'react';
+import logo from './assets/BLE-logo.png';
 
-function Header(props: any) {
+interface HeaderProps {
+  title: string;
+  description: string;
+}
+
+function Header(props: HeaderProps) {
   const bg = {
     backgroundColor: '#02002a',
   };
